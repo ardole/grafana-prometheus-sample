@@ -1,0 +1,27 @@
+---
+- hosts: node-1
+  roles:
+    - cloudalchemy.prometheus
+    - cloudalchemy.grafana
+  become: yes
+  vars:
+    prometheus_targets:
+      node:
+      - targets:
+        - 192.168.48.141:9273
+        - 192.168.48.142:9273
+        labels:
+          env: local
+    grafana_security:
+      admin_user: 'admin'
+      admin_password: 'admin1234'
+    grafana_datasources:
+      - name: prometheus
+        type: prometheus
+        access: proxy
+        url: 'http://192.168.48.141:9090'
+        basicAuth: false
+    grafana_dashboards:
+      - dashboard_id: 6149
+        revision_id: 1
+        datasource: prometheus
