@@ -13,11 +13,10 @@
   vars:
     prometheus_targets:
       node:
-      - targets:
-        - 192.168.48.141:9273
-        - 192.168.48.142:9273
-        labels:
-          env: local
+        - targets:
+            "{{ groups['all'] | map('extract', hostvars, ['ansible_host']) | map('regex_replace', '$', ':9100') | list }}"
+          labels:
+            env: demo
     prometheus_scrape_configs:
     - job_name: "node"
       file_sd_configs:
@@ -62,6 +61,23 @@
         url: 'http://192.168.48.141:9090'
         basicAuth: false
     grafana_dashboards:
-      - dashboard_id: 6149
-        revision_id: 1
+      # System dashboard : Node Exporter
+      - dashboard_id: 11001
+        revision_id: 9
+        datasource: prometheus
+      # System dashboard : Node Exporter
+      - dashboard_id: '1860'
+        revision_id: '12'
+        datasource: prometheus
+      # Prometheus itself dashboard
+      - dashboard_id: '3662'
+        revision_id: '2'
+        datasource: prometheus
+      # Docker dashboard
+      - dashboard_id: '4271'
+        revision_id: '4'
+        datasource: prometheus
+      # Docker dashboard
+      - dashboard_id: '11529'
+        revision_id: '2'
         datasource: prometheus
