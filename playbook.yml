@@ -1,6 +1,7 @@
 ---
 - hosts: node-1
   roles:
+    - cloudalchemy.blackbox-exporter
     - cloudalchemy.prometheus
     - cloudalchemy.grafana
   become: yes
@@ -12,6 +13,40 @@
         - 192.168.48.142:9273
         labels:
           env: local
+    prometheus_scrape_configs:
+    - job_name: "node"
+      file_sd_configs:
+      - files:
+        - "/etc/prometheus/file_sd/node.yml"
+    - job_name: "prometheus"
+      metrics_path: "/metrics"
+      static_configs:
+        - targets:
+            - "192.168.48.141:9090"
+    - job_name: 'blackbox'
+      metrics_path: /probe
+      params:
+        module: [http_2xx]
+      static_configs:
+        - targets:
+            - "http://192.168.48.141:3000"
+            - "http://192.168.48.142:3000"
+      relabel_configs:
+        - source_labels: [__address__]
+          target_label: __param_target
+        - source_labels: [__param_target]
+          target_label: instance
+        - target_label: __address__
+          replacement: 192.168.48.141:9115  # Blackbox exporter.
+    blackbox_exporter_configuration_modules:
+      http_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          method: GET
+          valid_status_codes:
+            - 200
+            - 201
     grafana_security:
       admin_user: 'admin'
       admin_password: 'admin1234'
