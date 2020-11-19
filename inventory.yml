@@ -1,0 +1,9 @@
+all:
+  hosts:
+    node-1:
+      ansible_host: 192.168.48.141
+    node-2:
+      ansible_host: 192.168.48.142
+    node-3:
+      ansible_host: 192.168.48.143
+

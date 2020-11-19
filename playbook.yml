@@ -1,10 +1,11 @@
 ---
-- name: Deploy node_exporter
+- name: "Deploy Node Exporter"
   hosts: all
   roles:
     - cloudalchemy.node-exporter
 
-- hosts: node-1
+- name: "Deploy Grafana, Prometheus and Blackbox Exporter"
+  hosts: node-1
   roles:
     - cloudalchemy.blackbox-exporter
     - cloudalchemy.prometheus
