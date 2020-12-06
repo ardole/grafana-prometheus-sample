@@ -2,3 +2,5 @@
 - src: cloudalchemy.prometheus
 - src: cloudalchemy.blackbox-exporter
 - src: cloudalchemy.node-exporter
+- src: riemers.gitlab-runner
+- src: geerlingguy.docker

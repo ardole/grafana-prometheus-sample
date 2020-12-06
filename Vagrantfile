@@ -9,7 +9,8 @@ servers = JSON.parse(%{
         "ram": 1024,
         "cpus": 1,
         "ip": "192.168.48.140",
-        "inline-shell": "yum update -y && yum install -y epel-release && yum install -y ansible",
+        "forwarded-ssh-port": "2220",
+        "inline-shell": "yum update -y && yum install -y epel-release && yum install -y ansible ansible-lint && useradd -m -s /bin/bash ansible",
         "synced-folder": {
             "host": "C:\\Workspace",
             "guest": "/workspace"
@@ -21,7 +22,8 @@ servers = JSON.parse(%{
         "ram": 1024,
         "cpus": 1,
         "ip": "192.168.48.141",
-        "inline-shell": "yum update -y",
+        "forwarded-ssh-port": "2221",
+        "inline-shell": "yum update -y && useradd -m -s /bin/bash ansible && usermod –aG wheel ansible",
         "ports": [
             {
                 "host": 9090,
@@ -38,7 +40,17 @@ servers = JSON.parse(%{
         "ram": 1024,
         "cpus": 1,
         "ip": "192.168.48.142",
-        "inline-shell": "yum update -y"
+        "forwarded-ssh-port": "2222",
+        "inline-shell": "yum update -y && useradd -m -s /bin/bash ansible && usermod –aG wheel ansible"
+    },
+    {
+        "name": "ansible-node-3",
+        "box": "centos/7",
+        "ram": 1024,
+        "cpus": 1,
+        "ip": "192.168.48.143",
+        "forwarded-ssh-port": "2223",
+        "inline-shell": "yum update -y && useradd -m -s /bin/bash ansible && usermod –aG wheel ansible"
     }
 ]
 })
@@ -60,6 +72,9 @@ Vagrant.configure("2") do |config|
             srv.vm.network "forwarded_port", guest: port['guest'], host: port['host']
         end
       end
+      if server.has_key?('forwarded-ssh-port')
+        srv.vm.network "forwarded_port", guest: 22, host: server['forwarded-ssh-port'], id: "ssh"
+      end
       srv.vm.provider "virtualbox" do |v|
         v.memory = server['ram']
         v.cpus = server['cpus']
@@ -67,4 +82,3 @@ Vagrant.configure("2") do |config|
     end
   end
 end
-

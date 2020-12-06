@@ -1,9 +1,9 @@
 ---
 - name: "Deploy Node Exporter"
   hosts: all
+  become: yes
   roles:
     - cloudalchemy.node-exporter
-
 - name: "Deploy Grafana, Prometheus and Blackbox Exporter"
   hosts: node-1
   roles:
@@ -18,11 +18,22 @@
             "{{ groups['all'] | map('extract', hostvars, ['ansible_host']) | map('regex_replace', '$', ':9100') | list }}"
           labels:
             env: demo
+      runners:
+        - targets:
+            - "192.168.48.142:9252" # prom
+            - "192.168.48.142:9323" # docker
+            - "192.168.48.142:8080" # pipelines
+          labels:
+            env: demo
     prometheus_scrape_configs:
     - job_name: "node"
       file_sd_configs:
       - files:
         - "/etc/prometheus/file_sd/node.yml"
+    - job_name: "runners"
+      file_sd_configs:
+      - files:
+        - "/etc/prometheus/file_sd/runners.yml"
     - job_name: "prometheus"
       metrics_path: "/metrics"
       static_configs:
@@ -63,10 +74,6 @@
         basicAuth: false
     grafana_dashboards:
       # System dashboard : Node Exporter
-      - dashboard_id: 11001
-        revision_id: 9
-        datasource: prometheus
-      # System dashboard : Node Exporter
       - dashboard_id: '1860'
         revision_id: '12'
         datasource: prometheus
@@ -82,3 +89,14 @@
       - dashboard_id: '11529'
         revision_id: '2'
         datasource: prometheus
+      - dashboard_id: '10620'
+        datasource: prometheus
+        revision_id: '4'
+      - dashboard_id: '13328'
+        datasource: prometheus
+        revision_id: '2'
+      - dashboard_id: '13329'
+        datasource: prometheus
+        revision_id: '2'
+    grafana_plugins:
+      - grafana-polystat-panel

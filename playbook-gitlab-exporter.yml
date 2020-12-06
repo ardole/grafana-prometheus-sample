@@ -1,0 +1,31 @@
+- name: "Deploy Gitlab CI prometheus exporter"
+  hosts: node-2
+  become: yes
+  vars:
+    gcpe_version: 'v0.4.5'
+    gcpe_url: 'https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/releases/download/{{ gcpe_version }}/gitlab-ci-pipelines-exporter_{{ gcpe_version }}_linux_amd64.tar.gz'
+    gcpe_download_file: '/tmp/gitlab-ci-pipelines-exporter_{{ gcpe_version }}_linux_amd64.tar.gz'
+    gcpe_install_directory: '/opt/application/gcpe'
+    gitlab_url: 'https://gitlab.com'
+    gitlab_token: '##TOKEN##'
+    gitlab_projects:
+      - '##PROJECT##'
+  tasks:
+    - name: Get GCPE
+      get_url:
+        url: '{{ gcpe_url }}'
+        dest: '{{ gcpe_download_file }}'
+    - name: 'Extract {{ gcpe_download_file }} into /usr/local/bin'
+      unarchive:
+        src: '{{ gcpe_download_file }}'
+        dest: '/usr/local/bin'
+        remote_src: yes
+        mode: '0755'
+    - name: 'Copy Gcpe configuration'
+      file:
+        path: '{{ gcpe_install_directory }}'
+        state: directory
+    - name: 'Copy Gcpe configuration'
+      template:
+        src: values.yml.j2
+        dest: '{{ gcpe_install_directory }}/values.yml'

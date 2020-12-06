@@ -1,0 +1,41 @@
+- name: "Deploy Gitlab runner"
+  hosts: node-2
+  become: yes
+  roles:
+    - geerlingguy.docker
+    - riemers.gitlab-runner
+  tasks:
+    - name: Deploy Docker daemon.json.
+      copy:
+        src: files/daemon.json
+        dest: /etc/docker/daemon.json
+      notify: "reload docker"
+  handlers:
+    - name: "reload docker"
+      systemd:
+        name: docker
+        daemon-reload: yes
+        state: restarted
+  vars:
+    docker_edition: 'ce'
+    docker_package: "docker-{{ docker_edition }}"
+    docker_package_state: present
+    gitlab_runner_coordinator_url: 'https://gitlab.com'
+    gitlab_runner_listen_address: '[::]:9252'
+    gitlab_runner_runners:
+      - name: 'Example Docker GitLab Runner'
+        # token is an optional override to the global gitlab_runner_registration_token
+        token: '##TOKEN##'
+        executor: docker
+        docker_image: 'alpine'
+        tags:
+          - custom
+        docker_volumes:
+          - "/var/run/docker.sock:/var/run/docker.sock"
+          - "/cache"
+        extra_configs:
+          runners.docker:
+            memory: 512m
+            allowed_images: ["ruby:*", "python:*", "php:*"]
+          runners.docker.sysctls:
+            net.ipv4.ip_forward: "1"

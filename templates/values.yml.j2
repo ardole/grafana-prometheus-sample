@@ -1,0 +1,8 @@
+gitlab:
+  url: '{{ gitlab_url }}'
+  token: '{{ gitlab_token }}'
+projects:
+{% for item in gitlab_projects %}
+  - name: {{ item }}
+{% endfor %}
+
